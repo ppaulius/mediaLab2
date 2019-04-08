@@ -2,39 +2,266 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Lab2 - VR application</title>
-    <meta name="description" content="Basic example for Point Cloud component."></meta>
-    <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+    <title>Lab 3 - VR application</title>
+    <meta name="description" content="LD3"></meta>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
     <script src="js/aframe-pointcloud-component.js"></script>
+    <script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js"></script>
+
   </head>
   <body>
-    <a-scene>
-      <a-assets>
-        <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
-        <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
-      </a-assets>
+    <script>
 
-      <a-plane src="#groundTexture" rotation="-90 0 0" height="100" width="100"></a-plane>
-      <a-light type="ambient" color="#445451"></a-light>
-      <a-light type="point" intensity="2" position="2 4 4"></a-light>
-      <a-sky height="2048" radius="30" src="#skyTexture" theta-length="90" width="2048"></a-sky>
-      <a-entity laser-controls line="color: red; opacity: 0.75"></a-entity>
-      <a-pointcloud 
-        scale="0.1 0.1 0.1" 
-        position="0 0.08 -2.5" 
-        rotation="-90 45 0" 
-        src="url(sculpt.ply)" 
-        size="0.01">
-      </a-pointcloud>
-      <a-pointcloud 
-        scale="0.5 0.5 0.5" 
-        position="1.5 2 0.5" 
-        src="url(Sphere.ply)" 
-        size="0.05"
-        texture="url(VGTU-logo.png)"
-        depthWrite="false">
-      </a-pointcloud>
+    AFRAME.registerComponent('show-compliment', {
+      init: function () {
+          var complimentsArray = [
+              'Šiandien nuostabiai atrodai!',
+              'Didžiuojuosi tavimi!',
+              'Koks nuostabus oras!',
+              'Žaviuosi tavo ambicijomis'
+          ];
 
+          this.el.addEventListener('click', function (evt) {
+            var complimentEl = document.querySelector("#labelText");
+            var visibleStatus = complimentEl.getAttribute("visible");
+
+            if (visibleStatus == false){
+              complimentEl.setAttribute("visible", true);
+          } else {
+              complimentEl.setAttribute("visible", false);
+          }
+            /*
+            var randomComplimentIndex = Math.floor(Math.random() * complimentsArray.length);
+            complimentEl.setAttribute("value", complimentsArray[randomComplimentIndex]);
+            */
+          });
+      }
+    });
+
+    // Component to change to a sequential color on click.
+    AFRAME.registerComponent('rotate-box', {
+        schema : { speed : {default:1}},
+        init : function(){
+          this.ifMouseDown = false;
+          this.x_cord = 0;
+          this.y_cord = 0;
+          document.addEventListener('mousedown',this.OnDocumentMouseDown.bind(this));
+          document.addEventListener('mouseup',this.OnDocumentMouseUp.bind(this));
+          document.addEventListener('mousemove',this.OnDocumentMouseMove.bind(this));
+        },
+        OnDocumentMouseDown : function(event){
+          this.ifMouseDown = true;
+          this.x_cord = event.clientX;
+          this.y_cord = event.clientY;
+        },
+        OnDocumentMouseUp : function(){
+          this.ifMouseDown = false;
+        },
+        OnDocumentMouseMove : function(event)
+        {
+          if(this.ifMouseDown)
+          {
+            var temp_x = event.clientX-this.x_cord;
+            var temp_y = event.clientY-this.y_cord;
+            if(Math.abs(temp_y)<Math.abs(temp_x))
+            {
+              this.el.object3D.rotateY(temp_x*this.data.speed/1000);
+            }
+            else
+            {
+              this.el.object3D.rotateX(temp_y*this.data.speed/1000);
+            }
+            this.x_cord = event.clientX;
+            this.y_cord = event.clientY;
+          }
+        }
+      });
+
+    // Component to change to a sequential color on click.
+    AFRAME.registerComponent('cursor-listener', {
+      init: function () {
+        var lastIndex = -1;
+        var COLORS = ['red', 'green', 'blue'];
+        this.el.addEventListener('click', function (evt) {
+          lastIndex = (lastIndex + 1) % COLORS.length;
+          this.setAttribute('material', 'color', COLORS[lastIndex]);
+          console.log('I was clicked at: ', evt.detail.intersection.point);
+        });
+      }
+    });
+
+    AFRAME.registerComponent('change-camera', {
+      init: function () {
+          var temp_x;
+          var temp_y;
+          var temp_z;
+
+          this.el.addEventListener('click', function (evt) {
+              var cameraRigEl = document.querySelector("#camera");
+
+              temp_x = Math.floor(Math.random() * 4);
+              temp_x *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+              temp_y = Math.floor(Math.random() * 4);
+              temp_y *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+              temp_z = Math.floor(Math.random() * 3);
+
+              cameraRigEl.setAttribute("position", {x:temp_x, y:temp_y, z:temp_z});
+          });
+      }
+    });
+
+    AFRAME.registerComponent('change-bg', {
+      init: function () {
+          this.el.addEventListener('click', function (evt) {
+              var bgEl = document.querySelector("#image-360");
+              var oldBg = bgEl.getAttribute("src");
+
+              if (oldBg == "#city"){
+                  bgEl.setAttribute("src", "#sechelt");
+              } else {
+                  bgEl.setAttribute("src", "#city");
+              }
+          });
+      }
+    });
+
+    AFRAME.registerComponent('off-sphere', {
+      init: function () {
+          this.el.addEventListener('click', function (evt) {
+              var sphereEl = document.querySelector("#sphere");
+              var visibleStatus = sphereEl.getAttribute("visible");
+
+              if (visibleStatus == true){
+                  sphereEl.setAttribute("visible", false);
+              }
+          });
+      }
+    });
+
+    AFRAME.registerComponent('on-sphere', {
+      init: function () {
+          this.el.addEventListener('click', function (evt) {
+              var sphereEl = document.querySelector("#sphere");
+              var visibleStatus = sphereEl.getAttribute("visible");
+
+              if (visibleStatus == false){
+                  sphereEl.setAttribute("visible", true);
+              }
+          });
+      }
+    });
+
+    </script>
+    <a-scene fog="type: linear; color: #AAB; far: 150; near: 0">
+        <a-assets>
+            <img id="city" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg">
+            <img id="sechelt" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
+        </a-assets>
+
+        <a-sky id="image-360" radius="10" src="#city" change-bg></a-sky>
+
+        <a-light type="ambient" color="#445451"></a-light>
+        <a-light type="point" intensity="2" position="2 4 4"></a-light>
+
+        <a-entity id="cameraRig" position="2 3 0">
+            <a-camera id="camera">
+                <a-cursor>
+                </a-cursor>
+            </a-camera>
+        </a-entity>
+
+        <a-box cursor-listener
+               rotate-box
+               position="5 3 -4"></a-box>
+
+        <a-pointcloud id="sphere"
+            position="-1 3 -4"
+            src="url(Sphere.ply)"
+            size="0.1"
+            texture="url(VGTU-logo.png)"
+            depthWrite="false"
+            visible="false">
+            <a-animation attribute="scale"
+                dur="2000"
+                from="0.5 0.5 0.5"
+                to="1 1 1"
+                direction="alternate-reverse"
+                easing="ease-in-out-circ"
+                repeat="indefine">
+            </a-animation>
+        </a-pointcloud>
+
+        <a-gui-flex-container
+          	flex-direction="column" justify-content="center" align-items="normal" component-padding="0.1" opacity="0.7" width="3.5" height="5.5"
+          	position="2 2.5 -4" rotation="0 0 0">
+
+            <a-gui-label
+                id="labelText"
+                width="2.5" height="0.75"
+                font-family="Arial"
+                margin="0 0 0.05 0"
+                visible="false"
+                value="You look good!"
+                background-color="aquamarine">
+            </a-gui-label>
+
+            <a-gui-icon-label-button
+            	width="2.5" height="0.75"
+            	value="Compliment"
+            	font-family="Arial"
+            	margin="0 0 0.05 0"
+                show-compliment>
+            </a-gui-icon-label-button>
+
+            <a-gui-button
+        		width="2.5" height="0.75"
+                active-color = "#ffffff"
+                background-color = "#f44245"
+                hover-color="#f44265"
+                font-color="#fff1cc"
+        		value="show sphere"
+        		font-family="Arial"
+        		margin="0 0 0.05 0"
+                on-sphere>
+        	</a-gui-button>
+
+            <a-gui-button
+        		width="2.5" height="0.75"
+                active-color = "#ffffff"
+                background-color = "#f44245"
+                hover-color="#f44265"
+                font-color="#fff1cc"
+        		value="hide sphere"
+        		font-family="Arial"
+        		margin="0 0 0.05 0"
+                off-sphere>
+        	</a-gui-button>
+
+            <a-gui-button
+                width="2.5" height="0.75"
+                active-color = "#ffffff"
+                background-color = "#f44245"
+                hover-color="#f44265"
+                font-color="#fff1cc"
+                value="change camera"
+                font-family="Arial"
+                margin="0 0 0.05 0"
+                change-camera>
+            </a-gui-button>
+
+            <a-gui-button
+                width="2.5" height="0.75"
+                active-color = "#ffffff"
+                background-color = "#f44245"
+                hover-color="#f44265"
+                font-color="#fff1cc"
+                value="change background"
+                font-family="Arial"
+                margin="0 0 0.05 0"
+                change-bg>
+            </a-gui-button>
+        </a-gui-flex-container>
     </a-scene>
   </body>
 </html>

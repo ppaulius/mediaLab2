@@ -1,6 +1,17 @@
-# MT-Lab2
+# MT-Lab 3
 
-This lab aims to build your first Virtual reality (VR) app.
+Features: 
+  - A-frame version 0.8.0
+  - Works best with Google Chrome
+  - Customized background
+  - UI menu
+  - User can rotate cube based on mouse actions (middle click and hold)
+  - User can sahow/ hide sphere
+  - Attempted to make random compliments from list, but had some issues with change of the value of an element.
+
+Project photos:
+![Window](https://www.part.lt/img/57f3405c5edcbb88822ca39a6307a8c649.png)
+![Window](https://www.part.lt/img/8c0c3019b48d6008f9223a0269028088873.png)
 
 There are many open source alternatives to build virtual reality application. One of the web based solution is A-frame. You can try a live examples: https://aframe.io/aframe/examples/
 
